@@ -84,6 +84,13 @@ class Table(object):
                 s += str(col)
             s += "\n"
         return s
+		
+    # export method will export the table in a file
+    # required! Must specify the file name variable in the object
+    #           before calling this function
+    def export(self):
+        with file(self.file, "w") as f:
+            f.write(str(self))
 
     '''
         returns all the possible values for a particular
