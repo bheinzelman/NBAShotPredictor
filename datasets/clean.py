@@ -24,16 +24,6 @@ def get_quartiles(ds, idx, n):
     quartiles.reverse()
     return quartiles
 
-def extra(table):
-    table.table = filter(lambda x: x[4] == 0, table.table)
-    made, total = 0, 0
-    for row in table.table:
-        if row[5] == 'made':
-            made += 1
-        total += 1
-
-    print float(made)/total
-
 
 if __name__ == '__main__':
     
@@ -44,6 +34,7 @@ if __name__ == '__main__':
     made_idx = 13
     ddist = 16
     margin_idx = 4
+    CLOSEST_DEFENDER = 14
 
     ds = Table(file="shot_logs.csv")
 
@@ -54,7 +45,7 @@ if __name__ == '__main__':
     print "NTILES shot dist"
     print ntiles_shot_distance
 
-    ntiles_def_distance = get_quartiles(ds, ddist, 15)
+    ntiles_def_distance = get_quartiles(ds, ddist, 5)
 
     print "NTILES def distance"
     print ntiles_def_distance
@@ -79,12 +70,12 @@ if __name__ == '__main__':
         row[margin_idx] = val
 
         # now get rid of everything we dont want
+        row[CLOSEST_DEFENDER] = row[CLOSEST_DEFENDER].replace(',', '')
 
         new_table.table.append([row[i] for i in ROWS_WE_WANT])
 
     new_table.file = "shot_log.min.csv"
     new_table.export()
-    extra(new_table)
     
 
 

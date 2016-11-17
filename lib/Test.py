@@ -258,7 +258,7 @@ class CrossValidation(Test):
 
         i = 0
         for val in flat:
-            partitions[i % 10].append(val)
+            partitions[i % self.k].append(val)
             i += 1
 
         return partitions
