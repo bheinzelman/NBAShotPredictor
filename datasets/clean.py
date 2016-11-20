@@ -11,6 +11,7 @@ def disc_distance(distance, vals):
     distance = float(distance)
     for i, val in enumerate(vals):
         if distance >= val:
+            print i
             return i
 
 def get_quartiles(ds, idx, n):
@@ -38,10 +39,13 @@ if __name__ == '__main__':
 
     ds = Table(file="shot_logs.csv")
 
+    titles = ds.table[0]
+    print titles
+
     ds.table = ds.table[1:]
     
 
-    ntiles_shot_distance = get_quartiles(ds, distance_idx, 10)
+    ntiles_shot_distance = get_quartiles(ds, distance_idx, 8)
     print "NTILES shot dist"
     print ntiles_shot_distance
 
@@ -73,7 +77,10 @@ if __name__ == '__main__':
         row[CLOSEST_DEFENDER] = row[CLOSEST_DEFENDER].replace(',', '')
 
         new_table.table.append([row[i] for i in ROWS_WE_WANT])
-
+    
+    titles = [titles[i] for i in ROWS_WE_WANT]
+    
+    new_table.table = [titles] + new_table.table
     new_table.file = "shot_log.min.csv"
     new_table.export()
     
