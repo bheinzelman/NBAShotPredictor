@@ -1,7 +1,8 @@
-from random import randint
+from random import randint, shuffle
 import copy
 from tabulate import tabulate
 from Table import Table
+from Samples import StratifiedSample
 
 '''
     Author Bert Heinzelman, Brad Carrion
@@ -17,7 +18,6 @@ from Table import Table
     tests on the dataset
 '''
 
-
 class Test(object):
 
     def __init__(self, classifier, table):
@@ -30,7 +30,7 @@ class Test(object):
         Executes the tests
     '''
 
-    def run_test(self):
+    def run_test(self, **kwargs):
         raise Exception("Cannot call method from base class")
 
     '''
@@ -44,7 +44,7 @@ class Test(object):
         matrix = []
         for i in distinct_vals:
             new_row = [0 for j in range(x_len)]
-            new_row[0] = i 
+            new_row[0] = i
             matrix.append(new_row)
 
         return matrix
@@ -133,15 +133,18 @@ class Test(object):
 
 class RandomTest(Test):
 
-    def run_test(self):
+    def run_test(self, **kwargs):
+        display = kwargs.get('display', True)
         runs = 5
         for i in range(0, runs):
             rindex = randint(0, len(self.table.table) - 1)
             instance = self.table.table[rindex]
             predicted_val = self.classifier.classify(instance)
             s_instance = (str(instance)[1:-1]).replace('\'', '')
-            print 'instance: ' + s_instance
-            print 'class: ' + str(int(predicted_val)) + ', actual: ' + str(instance[self.classifier.idx])
+
+            if display:
+                print 'instance: ' + s_instance
+                print 'class: ' + str(int(predicted_val)) + ', actual: ' + str(instance[self.classifier.idx])
 
 '''
     Perfoms a random subsampling test run.
@@ -157,7 +160,8 @@ class RandomSubsample(Test):
         self.rounds = rounds
         self.split = split
 
-    def run_test(self):
+    def run_test(self, **kwargs):
+        display = kwargs.get('display', True)
         for i in range(self.rounds):
             test, training = self.random_subsample()
             self.classifier.set_table(training)
@@ -168,9 +172,10 @@ class RandomSubsample(Test):
                 self.confusion[row[self.idx] - 1][prediction] += 1
 
         self.generate_results()
-        # self.print_matrix()
-        print "\nRandom Subsample (k=10, 2:1 Train/Test)"
-        print "\t " + str(self.classifier) + ": accuracy: " + str(self.accuracy()) + ", error rate: " + str(self.error())
+        if display:
+            # self.print_matrix()
+            print "\nRandom Subsample (k=10, 2:1 Train/Test)"
+            print "\t " + str(self.classifier) + ": accuracy: " + str(self.accuracy()) + ", error rate: " + str(self.error())
 
     '''
         Returns a Random subsampling
@@ -204,95 +209,25 @@ class CrossValidation(Test):
         self.classifier = classifier
         self.k = k
 
-    '''
-        Builds up a frequency table.
-        Supplies how many of each class label should be in each partition
-    '''
+    def run_test(self, **kwargs):
+        display = kwargs.get('display', True)
 
-    def propper_ratios(self):
-        freq = {}
+        # pass in the domain in the case that the training set does not have all
+        # the values. If this is the case, you will get a key error..
+        domain = kwargs.get('domain', [])
 
-        # number of instances per partition
-        space = self.table.count_rows() / self.k
-
-        # count different classes
-        for row in self.table.table:
-            if row[self.idx] in freq:
-                freq[row[self.idx]] += 1
-            else:
-                freq[row[self.idx]] = 1
-
-        # change to percentages
-        for key in freq.keys():
-            freq[key] /= float(self.table.count_rows())
-            freq[key] *= space
-            freq[key] = int(freq[key])
-
-        return freq
-
-    '''
-        Takes the dataset and splits it into k different partitions each with
-        more or less the same distribution of class labels
-    '''
-
-    def get_partitions(self):
-        freq = self.propper_ratios()
-
-        groups = copy.deepcopy(self.table.group_by(self.idx, type="map"))
-
-        partitions = []
-
-        # builds each partition with the same ratio of each class
-        for i in range(0, self.k):
-            partitions.append([])
-            # grabs the correct distribution
-            for key in freq.keys():
-                values_to_get = freq[key]
-                # puts the correct distribution in each partition
-                for j in range(0, values_to_get):
-                    partitions[-1].append(groups[key].table[0])
-                    del groups[key].table[0]
-
-        # sprinkle the rest in some partition
-        flat = [val for key in groups.keys() for val in groups[key].table]  # flatten list
-
-        i = 0
-        for val in flat:
-            partitions[i % self.k].append(val)
-            i += 1
-
-        return partitions
-
-    '''
-        Given the partition list, i.e. [d1, d2, ..., dk]
-        this function will return a tuple containing di,
-        and the union of the other tables, which will be
-        the training set.
-    '''
-
-    def cross_validation(self, partitions, i):
-        cpy = copy.deepcopy(partitions)
-
-        test = partitions[i]
-        training = []
-
-        # build up union of partitions for training set
-        for j in range(0, len(cpy)):
-            if i != j:
-                training += cpy[j]
-
-        return (test, Table(table=training))
-
-    def run_test(self):
-        partitions = self.get_partitions()
-
-        distinct = list(set(self.table.get_column(self.idx)))
+        partitions = StratifiedSample.get_partitions(self.table, self.idx, self.k)
+        distinct = None
+        if len(domain) == 0:
+            distinct = list(set(self.table.get_column(self.idx)))
+        else:
+            distinct = domain[self.idx]
 
         #create a lookup for values
         lookup = {val: i for i, val in enumerate(distinct)}
 
         for i in range(self.k):
-            test, training = self.cross_validation(partitions, i)
+            test, training = StratifiedSample.cross_validation(partitions, i)
             self.classifier.set_table(training)
             for row in test:
                 prediction = self.classifier.classify(row)
@@ -300,6 +235,7 @@ class CrossValidation(Test):
                 self.confusion[lookup[row[self.idx]]][lookup[prediction]+1] += 1
 
         self.generate_results()
-        print "Stratified 10-fold Cross Validation"
-        print "\t " + str(self.classifier) + ": accuracy: " + str(self.accuracy()) + ", error rate: " + str(self.error())
-        self.print_matrix()
+        if display:
+            print "Stratified 10-fold Cross Validation"
+            print "\t " + str(self.classifier) + ": accuracy: " + str(self.accuracy()) + ", error rate: " + str(self.error())
+            self.print_matrix()

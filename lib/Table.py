@@ -101,3 +101,9 @@ class Table(object):
         for row in self.table:
             vals.add(row[index])
         return vals
+
+    def get_domain(self, attributes):
+        domain = {}
+        for at in attributes:
+            domain[at] = self.get_vals(at)
+        return domain
