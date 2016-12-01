@@ -36,16 +36,16 @@ def get_shot_dist_ntiles(n, idx):
     # quartiles[0] = '0-' + str(quartiles[0])
 
     labels = []
-    prev = 0
+    prev = str(0.0)
     for val in quartiles:
-        labels.append(str(prev) + '-' + str(val))
+        labels.append(str(prev) + '-\n' + str(val))
         prev = val
 
     return labels 
 
 
 
-def made_miss_by_dist(table, idx, other_idx, xlabel, ylabel, name):
+def made_miss_by_dist(table, idx, other_idx, xlabel, ylabel, name, title):
     RESULT = 5
     groups = table.group_by(idx)
     groups.sort(key=lambda g: g.table[0][idx])
@@ -75,9 +75,12 @@ def made_miss_by_dist(table, idx, other_idx, xlabel, ylabel, name):
     ax.set_xticks(map(lambda x: x + 0.3, range(1, len(groups) + 1)))
     ax.set_xticklabels(get_shot_dist_ntiles(len(groups), other_idx))
 
+    ax.legend((r1[0], r2[0]), ('Made', 'Missed'), loc=2)
+
     pyplot.grid(True)
     pyplot.xlabel(xlabel)
     pyplot.ylabel(ylabel)
+    pyplot.title(title)
     pyplot.savefig(name)
     pyplot.close()
     
@@ -101,6 +104,6 @@ if __name__ == '__main__':
     if not os.path.exists('viz'):
         os.makedirs('viz')
 
-    made_miss_by_dist(ds, SHOT_DIST, SHOT_DIST_ORIG, "Shot Distance (FT)", "Count", "viz/shot_distance.pdf")
-    made_miss_by_dist(ds, DEF_DIST, DEF_DIST_ORIG, "Defensive Distance (FT)", "Count", "viz/def_distance.pdf")
+    made_miss_by_dist(ds, SHOT_DIST, SHOT_DIST_ORIG, "Shot Distance (FT)", "Count", "viz/shot_distance.pdf", "Shot Distance")
+    made_miss_by_dist(ds, DEF_DIST, DEF_DIST_ORIG, "Defensive Distance (FT)", "Count", "viz/def_distance.pdf", "Defender Distance")
 
