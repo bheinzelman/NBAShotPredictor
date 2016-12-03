@@ -45,7 +45,7 @@ def get_shot_dist_ntiles(n, idx):
 
 
 
-def made_miss_by_dist(table, idx, other_idx, xlabel, ylabel, name, title):
+def bar_graph_continuous(table, idx, other_idx, xlabel, ylabel, name, title):
     RESULT = 5
     groups = table.group_by(idx)
     groups.sort(key=lambda g: g.table[0][idx])
@@ -83,7 +83,47 @@ def made_miss_by_dist(table, idx, other_idx, xlabel, ylabel, name, title):
     pyplot.title(title)
     pyplot.savefig(name)
     pyplot.close()
+
+def bar_graph_categorical(table, idx, xlabel, ylabel, name, title, **kwargs):
+    RESULT = 5
     
+    location = kwargs.get('loc', 2)
+
+    groups = table.group_by(idx, type="map") 
+
+    made = [0 for key in groups.keys()]
+    missed = [0 for key in groups.keys()]
+
+    key_map = {key: i for i, key in enumerate(groups.keys())}
+
+    for key in groups.keys():
+        for row in groups[key].table:
+            if row[RESULT] == 'made':
+                made[key_map[key]] += 1
+            else:
+                missed[key_map[key]] += 1
+
+    group_count = len(groups.keys())
+
+    pyplot.figure()
+
+    fig, ax = pyplot.subplots()
+
+    r1 = ax.bar(range(1, group_count + 1), made, 0.3, color='g')
+    r2_v = map(lambda x: x + 0.3, range(1, group_count + 1))
+    r2 = ax.bar(r2_v, missed, 0.3, color='r')
+    
+    ax.set_xticks(map(lambda x: x + 0.3, range(1, group_count + 1)))
+
+    ax.legend((r1[0], r2[0]), ('Made', 'Missed'), loc=location)
+    ax.set_xticklabels(key_map.keys())
+
+    pyplot.grid(True)
+    pyplot.xlabel(xlabel)
+    pyplot.ylabel(ylabel)
+    pyplot.title(title)
+    pyplot.savefig(name)
+    pyplot.close()
 
 if __name__ == '__main__':
     RESULT = 5
@@ -95,7 +135,13 @@ if __name__ == '__main__':
     DEF_DIST_ORIG = 16
 
     LOCATION = 0
-    LOCATION_ORIG = 2
+
+    GAME_OUTCOME = 1
+
+    MARGIN = 2
+    MARGIN_ORIG = 4
+
+    PERIOD = 3
     
     ds = Table(file="datasets/shot_log.min.csv")
 
@@ -104,6 +150,11 @@ if __name__ == '__main__':
     if not os.path.exists('viz'):
         os.makedirs('viz')
 
-    made_miss_by_dist(ds, SHOT_DIST, SHOT_DIST_ORIG, "Shot Distance (FT)", "Count", "viz/shot_distance.pdf", "Shot Distance")
-    made_miss_by_dist(ds, DEF_DIST, DEF_DIST_ORIG, "Defensive Distance (FT)", "Count", "viz/def_distance.pdf", "Defender Distance")
+    bar_graph_continuous(ds, SHOT_DIST, SHOT_DIST_ORIG, "Shot Distance (FT)", "Count", "viz/shot_distance.pdf", "Shot Distance")
+    bar_graph_continuous(ds, DEF_DIST, DEF_DIST_ORIG, "Defensive Distance (FT)", "Count", "viz/def_distance.pdf", "Defender Distance")
+    bar_graph_continuous(ds, MARGIN, MARGIN_ORIG, "Final Margin (PTS)", "Count", "viz/margin.pdf", "Shots by Game Margin")
+
+    bar_graph_categorical(ds, LOCATION, "Location H/A", "Count", "viz/home_away.pdf", "Shots by Location")
+    bar_graph_categorical(ds, GAME_OUTCOME, "Game Outcome W/L", "Count", "viz/win_lose.pdf", "Shots by Game Outcome")
+    bar_graph_categorical(ds, PERIOD, "Period", "Count", "viz/period.pdf", "Shots by Period", loc=1)
 
