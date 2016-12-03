@@ -2,6 +2,7 @@ import sys
 sys.path.append('../')
 from lib.Table import Table
 import math
+import json
 
 '''
     This program cleans and discritizes the data
@@ -11,7 +12,6 @@ def disc_distance(distance, vals):
     distance = float(distance)
     for i, val in enumerate(vals):
         if distance >= val:
-            print i
             return i
 
 def get_quartiles(ds, idx, n):
@@ -37,14 +37,14 @@ if __name__ == '__main__':
     margin_idx = 4
     CLOSEST_DEFENDER = 14
 
+    SHOOTER = 19 
+
     ds = Table(file="shot_logs.csv")
 
     titles = ds.table[0]
-    print titles
 
     ds.table = ds.table[1:]
     
-
     ntiles_shot_distance = get_quartiles(ds, distance_idx, 8)
     print "NTILES shot dist"
     print ntiles_shot_distance
@@ -60,7 +60,7 @@ if __name__ == '__main__':
     print ntiles_final_margin
     
     new_table = Table(table=[])
-
+    
     for row in ds.table:
         # discritize shot distance to a value from 1-10
         val = disc_distance(row[distance_idx], ntiles_shot_distance)
@@ -83,6 +83,7 @@ if __name__ == '__main__':
     new_table.table = [titles] + new_table.table
     new_table.file = "shot_log.min.csv"
     new_table.export()
+    
     
 
 

@@ -306,7 +306,6 @@ class RandomForestClassifier(Classifier):
 
     def __init__(self, idx, attributes, table, n, m, f, **kwargs):
         domain = kwargs.get('domain', {})
-
         # set the class attributes
         super(RandomForestClassifier, self).__init__(idx, attributes, table)
         self.n = n
@@ -322,8 +321,9 @@ class RandomForestClassifier(Classifier):
         # build each tree and test its accuracy
         for i in range(self.n):
             boot = bootstrap_sample(self.table)
-            tree = RandomTreeClassifier(
-                idx, attributes, boot, self.f, domain=domain)
+            # tree = RandomTreeClassifier(
+                # idx, attributes, boot, self.f, domain=domain)
+            tree = self.build_single_classifier(idx, attributes, boot, self.f, domain=domain)
 
             ntrees.append((tree, self.test_accuracy(validation_set, tree)))
 
@@ -335,6 +335,9 @@ class RandomForestClassifier(Classifier):
             cur_min = min(ntrees, key=lambda x: x[1])
             self.trees.append(cur_min[0])
             ntrees.remove(cur_min)
+
+    def build_single_classifier(self, idx, attributes, boot, f, domain):
+        return RandomTreeClassifier(idx, attributes, boot, self.f, domain=domain)
         
 
             
@@ -406,7 +409,7 @@ class TreeNode(object):
         # check if partitions are all the same classes
         distinct_vals = list(set(table.get_column(class_idx)))
         if len(distinct_vals) == 1:
-            self.class_label = distinct_vals[0]
+            self.class_label = self.get_class_label(table, class_idx)
             return self
 
         new_attributes = self.get_attributes(attributes)
@@ -449,7 +452,7 @@ class TreeNode(object):
     '''
         Runs through a table and returns the most occuring class label
     '''
-    def get_class_label(self, table, class_idx):
+    def get_class_label(self, table, class_idx): 
         freq = {}
         for row in table.table:
             if row[class_idx] in freq:
