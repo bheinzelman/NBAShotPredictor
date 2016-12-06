@@ -1,4 +1,5 @@
 *.pyc
 shot_log.min.csv
 *.pdf
-out.txt
+out/
+*.docx

@@ -4,10 +4,22 @@ from lib.Table import Table
 import math
 import json
 
+
+
+def remove_shotclock_nas(table):
+    shotclock = 8
+    gameclock = 7
+
+    for row in table.table:
+        if len(row[shotclock]) == 0:
+            new_time = row[gameclock].replace(':', '.')
+
+            row[shotclock] = new_time
+
+
 '''
     This program cleans and discritizes the data
 '''
-
 def disc_distance(distance, vals):
     distance = float(distance)
     for i, val in enumerate(vals):
@@ -36,8 +48,7 @@ if __name__ == '__main__':
     ddist = 16
     margin_idx = 4
     CLOSEST_DEFENDER = 14
-
-    SHOOTER = 19 
+    shotclock = 8
 
     ds = Table(file="shot_logs.csv")
 
@@ -45,20 +56,24 @@ if __name__ == '__main__':
 
     ds.table = ds.table[1:]
     
+    remove_shotclock_nas(ds)
+    
     ntiles_shot_distance = get_quartiles(ds, distance_idx, 8)
-    print "NTILES shot dist"
+    print "octiles shot distance"
     print ntiles_shot_distance
 
     ntiles_def_distance = get_quartiles(ds, ddist, 5)
-
-    print "NTILES def distance"
+    print "quiniles shot distance"
     print ntiles_def_distance
-    
+ 
     ntiles_final_margin = get_quartiles(ds, margin_idx, 10)
-    
-    print "NTILES final margin"
+    print "deciles final margin"
     print ntiles_final_margin
-    
+
+    ntiles_shotclock = get_quartiles(ds, shotclock, 10)
+    print "dectiles shot clock"
+    print ntiles_shotclock
+     
     new_table = Table(table=[])
     
     for row in ds.table:
@@ -75,8 +90,15 @@ if __name__ == '__main__':
 
         # now get rid of everything we dont want
         row[CLOSEST_DEFENDER] = row[CLOSEST_DEFENDER].replace(',', '')
+        
+        new_row = [row[i] for i in ROWS_WE_WANT]
+        
+        time = disc_distance(row[shotclock], ntiles_shotclock)
 
-        new_table.table.append([row[i] for i in ROWS_WE_WANT])
+        new_row.append(time)
+        
+        new_table.table.append(new_row)
+        #new_table.table.append([row[i] for i in ROWS_WE_WANT])
     
     titles = [titles[i] for i in ROWS_WE_WANT]
     

@@ -20,10 +20,21 @@ import matplotlib.pyplot as pyplot
 from lib.Table import Table
 import os
 
+def remove_shotclock_nas(table):
+    shotclock = 8
+    gameclock = 7
+
+    for row in table.table:
+        if len(row[shotclock]) == 0:
+            new_time = row[gameclock].replace(':', '.')
+
+            row[shotclock] = new_time
+
 def get_shot_dist_ntiles(n, idx):
-    SHOT_DIST = 11
     ds = Table(file="datasets/shot_logs.csv")
     ds.table = ds.table[1:]
+
+    remove_shotclock_nas(ds)
 
     table = map(lambda r: r[:idx] + [float(r[idx])] + r[idx:], ds.table)
     
@@ -141,8 +152,11 @@ if __name__ == '__main__':
     MARGIN = 2
     MARGIN_ORIG = 4
 
+    SHOT_CLOCK = 9
+    SHOT_CLOCK_ORIG = 8
+
     PERIOD = 3
-    
+ 
     ds = Table(file="datasets/shot_log.min.csv")
 
     ds.table = ds.table[1:]
@@ -150,9 +164,10 @@ if __name__ == '__main__':
     if not os.path.exists('viz'):
         os.makedirs('viz')
 
-    bar_graph_continuous(ds, SHOT_DIST, SHOT_DIST_ORIG, "Shot Distance (FT)", "Count", "viz/shot_distance.pdf", "Shot Distance")
-    bar_graph_continuous(ds, DEF_DIST, DEF_DIST_ORIG, "Defensive Distance (FT)", "Count", "viz/def_distance.pdf", "Defender Distance")
-    bar_graph_continuous(ds, MARGIN, MARGIN_ORIG, "Final Margin (PTS)", "Count", "viz/margin.pdf", "Shots by Game Margin")
+    bar_graph_continuous(ds, SHOT_DIST, SHOT_DIST_ORIG, "Shot Distance (FT)", "Count", "viz/shot_distance.pdf", "Shot Distance by Octile")
+    bar_graph_continuous(ds, DEF_DIST, DEF_DIST_ORIG, "Defensive Distance (FT)", "Count", "viz/def_distance.pdf", "Defender Distance by Quintile")
+    bar_graph_continuous(ds, MARGIN, MARGIN_ORIG, "Final Margin (PTS)", "Count", "viz/margin.pdf", "Shots by Game Margin by Percentile")
+    bar_graph_continuous(ds, SHOT_CLOCK, SHOT_CLOCK_ORIG, "Shot Clock (seconds)", "Count", "viz/shot_clock.pdf", "Shots by Shotclock")
 
     bar_graph_categorical(ds, LOCATION, "Location H/A", "Count", "viz/home_away.pdf", "Shots by Location")
     bar_graph_categorical(ds, GAME_OUTCOME, "Game Outcome W/L", "Count", "viz/win_lose.pdf", "Shots by Game Outcome")

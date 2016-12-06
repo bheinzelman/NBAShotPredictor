@@ -1,5 +1,9 @@
 from Classifiers import RandomTreeNode, RandomTreeClassifier, RandomForestClassifier
 
+
+'''
+    Decision Tree Node for basketball classifier
+'''
 class BBallTreeNode(RandomTreeNode):
     '''
         For each possible lable, returns the probability
@@ -13,13 +17,17 @@ class BBallTreeNode(RandomTreeNode):
                 freq[row[class_idx]] += 1
             else:
                 freq[row[class_idx]] = 1
-
+        
+        # returns the percentage of rows that are made and missed
         fs = {key: freq[key]/float(len(table.table)) for key in freq.keys()}
         return fs
 
     def make_node(self):
         return BBallTreeNode(self.f, domain=self.domain)
-
+    
+'''
+    Individual BBall classifier tree to go in random forest
+'''
 class BBallRTClassifier(RandomTreeClassifier):
     def init_tree(self):
         node = BBallTreeNode(self.f, domain=self.domain).build_children(
@@ -35,13 +43,11 @@ class BBallRTClassifier(RandomTreeClassifier):
     def __str__(self):
         return "BBall Random Decision Tree"
 
-class BBallRFClassifier(RandomForestClassifier):
-    def __init__(self, idx, attributes, table, n, m, f, **kwargs):
-        super(BBallRFClassifier, self).__init__(idx, attributes, table, n, m, f, **kwargs)
 
-        # self.percentages = shot_perc 
-        self.SHOOTER = 8
-    
+'''
+    Basketball Random forest classifier
+'''
+class BBallRFClassifier(RandomForestClassifier): 
     '''
         OVERRIDE
         Given a validation set, and a classifier,
@@ -60,7 +66,13 @@ class BBallRFClassifier(RandomForestClassifier):
                 correct += 1
 
         return correct / float(len(validation_set))
-
+    
+    '''
+        Averages all made/missed percetages for each tree.
+        Will return 'made' if made % greater than 53%
+        otherwise will return a miss
+    '''
+    #OVERRIDE
     def classify(self, row):
         votes = {}
 
@@ -72,18 +84,12 @@ class BBallRFClassifier(RandomForestClassifier):
                     votes[key] = values[key]
                 else:
                     votes[key] += values[key]
- 
-        # votes = [(key, votes[key]) for key in votes.keys()]
-        
-        # the_vote = max(votes, key=lambda x: x[1]/float(len(self.trees)))
-        
+  
         if 'made' in votes:
-            if votes['made']/float(len(self.trees)) >= .53:
+            if votes['made']/float(len(self.trees)) >= .52:
                 return 'made'
         return 'missed'
-
-        
-        return the_vote[0]
+     
     
     def build_single_classifier(self, idx, attributes, boot, f, domain):
         return BBallRTClassifier(idx, attributes, boot, self.f, domain=domain)
