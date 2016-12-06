@@ -81,12 +81,12 @@ if __name__ == '__main__':
     
     print "\nTop Shooters"
     for i, player in enumerate(shot_percentages[:10]):
-        print str(i + 1) + ': ' + player[0] + ": " + str(player[1]) + "%"
+        print str(i + 1) + ': ' + player[0] + ": " + str(int(100*player[1])) + "%"
 
 
     print "\nWorst Shooters"
     for i, player in enumerate(shot_percentages[-10:]):
-        print str(i + 1) + ': ' + player[0] + ": " + str(player[1]) + "%"
+        print str(i + 1) + ': ' + player[0] + ": " + str(int(100*player[1])) + "%"
 
     
     print "\nAccuracy By Distance"
