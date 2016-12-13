@@ -2,6 +2,5 @@
 shot_log.min.csv
 *.pdf
 output/
-viz/
 *.docx
 pres/
