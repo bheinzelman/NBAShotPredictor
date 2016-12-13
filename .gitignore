@@ -1,5 +1,7 @@
 *.pyc
 shot_log.min.csv
 *.pdf
-out/
+output/
+viz/
 *.docx
+pres/
