@@ -4,7 +4,7 @@ from Classifiers import RandomTreeNode, RandomTreeClassifier, RandomForestClassi
 '''
     Decision Tree Node for basketball classifier
 '''
-class BBallTreeNode(RandomTreeNode):
+class FuzzyTreeNode(RandomTreeNode):
     '''
         For each possible lable, returns the probability
         that that a given instance has that label
@@ -23,31 +23,31 @@ class BBallTreeNode(RandomTreeNode):
         return fs
 
     def make_node(self):
-        return BBallTreeNode(self.f, domain=self.domain)
+        return FuzzyTreeNode(self.f, domain=self.domain)
     
 '''
     Individual BBall classifier tree to go in random forest
 '''
-class BBallRTClassifier(RandomTreeClassifier):
+class FuzzyRTClassifier(RandomTreeClassifier):
     def init_tree(self):
-        node = BBallTreeNode(self.f, domain=self.domain).build_children(
+        node = FuzzyTreeNode(self.f, domain=self.domain).build_children(
             self.table, self.attributes, self.idx)
         return node
 
     # OVERRIDE
     def set_table(self, new_table):
-        node = BBallTreeNode(self.f, domain=self.domain).build_children(
+        node = FuzzyTreeNode(self.f, domain=self.domain).build_children(
             new_table, self.attributes, self.idx)
         self.tree = node
 
     def __str__(self):
-        return "BBall Random Decision Tree"
+        return "Fuzzy Random Decision Tree"
 
 
 '''
     Basketball Random forest classifier
 '''
-class BBallRFClassifier(RandomForestClassifier): 
+class FuzzyRFClassifier(RandomForestClassifier): 
     '''
         OVERRIDE
         Given a validation set, and a classifier,
@@ -86,14 +86,14 @@ class BBallRFClassifier(RandomForestClassifier):
                     votes[key] += values[key]
   
         if 'made' in votes:
-            if votes['made']/float(len(self.trees)) >= .52:
+            if votes['made']/float(len(self.trees)) >= .49:
                 return 'made'
         return 'missed'
      
     
     def build_single_classifier(self, idx, attributes, boot, f, domain):
-        return BBallRTClassifier(idx, attributes, boot, self.f, domain=domain)
+        return FuzzyRTClassifier(idx, attributes, boot, self.f, domain=domain)
 
     def __str__(self):
-        return "BBall Random Forest Classifier"
+        return "Fuzzy Random Forest Classifier"
 

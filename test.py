@@ -1,6 +1,5 @@
 from lib.Classifiers import DecisionTreeClassifier, KNNClassifier, BayesianClassifier, RandomForestClassifier
-from lib.BBallClassifier import BBallRFClassifier
-from lib.dummy import DummyClassifier
+from lib.FuzzyClassifier import FuzzyRFClassifier
 from lib.Table import Table
 from lib.Test import CrossValidation
 from lib.Samples import StratifiedSample
@@ -29,8 +28,8 @@ if __name__ == '__main__':
     print "Done...\n\n" 
 
 
-    print 'Building BBall Random Forest Classifier...'
-    rf = BBallRFClassifier(CLASS_ID, ATS1, train, 15, 7, 5, domain=domain)
+    print 'Building Fuzzy Random Forest Classifier...'
+    rf = FuzzyRFClassifier(CLASS_ID, ATS1, train, 15, 7, 5, domain=domain)
     print 'Done...\n\n'
 
     print 'Testing BBall Random Forest Classifier...' 
