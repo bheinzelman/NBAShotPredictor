@@ -15,7 +15,7 @@
 '''
 
 import matplotlib
-matplotlib.use('pdf')
+# matplotlib.use('pdf')
 import matplotlib.pyplot as pyplot
 from lib.Table import Table
 import os
@@ -164,12 +164,12 @@ if __name__ == '__main__':
     if not os.path.exists('viz'):
         os.makedirs('viz')
 
-    bar_graph_continuous(ds, SHOT_DIST, SHOT_DIST_ORIG, "Shot Distance (FT)", "Count", "viz/shot_distance.pdf", "Shot Distance by Octile")
-    bar_graph_continuous(ds, DEF_DIST, DEF_DIST_ORIG, "Defensive Distance (FT)", "Count", "viz/def_distance.pdf", "Defender Distance by Quintile")
-    bar_graph_continuous(ds, MARGIN, MARGIN_ORIG, "Final Margin (PTS)", "Count", "viz/margin.pdf", "Shots by Game Margin by Percentile")
-    bar_graph_continuous(ds, SHOT_CLOCK, SHOT_CLOCK_ORIG, "Shot Clock (seconds)", "Count", "viz/shot_clock.pdf", "Shots by Shotclock")
+    bar_graph_continuous(ds, SHOT_DIST, SHOT_DIST_ORIG, "Shot Distance (FT)", "Count", "viz/shot_distance.png", "Shot Distance")
+    bar_graph_continuous(ds, DEF_DIST, DEF_DIST_ORIG, "Defensive Distance (FT)", "Count", "viz/def_distance.png", "Defender Distance")
+    bar_graph_continuous(ds, MARGIN, MARGIN_ORIG, "Final Margin (PTS)", "Count", "viz/margin.png", "Shots by Final Margin")
+    bar_graph_continuous(ds, SHOT_CLOCK, SHOT_CLOCK_ORIG, "Shot Clock (seconds)", "Count", "viz/shot_clock.png", "Shots by Shotclock")
 
-    bar_graph_categorical(ds, LOCATION, "Location H/A", "Count", "viz/home_away.pdf", "Shots by Location")
-    bar_graph_categorical(ds, GAME_OUTCOME, "Game Outcome W/L", "Count", "viz/win_lose.pdf", "Shots by Game Outcome")
-    bar_graph_categorical(ds, PERIOD, "Period", "Count", "viz/period.pdf", "Shots by Period", loc=1)
+    bar_graph_categorical(ds, LOCATION, "Location H/A", "Count", "viz/home_away.png", "Shots by Location")
+    bar_graph_categorical(ds, GAME_OUTCOME, "Game Outcome W/L", "Count", "viz/win_lose.png", "Shots by Game Outcome")
+    bar_graph_categorical(ds, PERIOD, "Period", "Count", "viz/period.png", "Shots by Period", loc=1)
 
